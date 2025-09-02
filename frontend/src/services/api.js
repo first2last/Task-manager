@@ -1,9 +1,15 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+// Correct way to handle environment-based URLs
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://task-manager-9ua1.onrender.com/api'  // Add /api here
+  : 'http://localhost:5000/api';  // Add /api here too
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 // Add token to requests
@@ -26,7 +32,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.reload();
+      // Redirect to login instead of reload
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
