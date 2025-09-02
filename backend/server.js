@@ -1,10 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
 
-const authRoutes = require('./routes/auth');
-const taskRoutes = require('./routes/tasks');
+dotenv.config();
 
 const app = express();
 
@@ -12,26 +11,60 @@ const app = express();
 app.use(cors({
   origin: [
     'https://task-manager-azure-rho-51.vercel.app',
-    'http://localhost:3000' // Keep for local development
+    'http://localhost:3000'
   ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  credentials: true
 }));
+
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/taskmanager')
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+// Database connection
+const connectDB = require('./config/db');
+connectDB();
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/tasks', taskRoutes);
+// Add this route to handle /api
+app.get('/api', (req, res) => {
+  res.json({ 
+    message: 'Task Manager API is working!',
+    endpoints: [
+      'POST /api/auth/register - Register new user',
+      'POST /api/auth/login - Login user', 
+      'GET /api/auth/me - Get current user',
+      'GET /api/tasks - Get user tasks',
+      'POST /api/tasks - Create task',
+      'PUT /api/tasks/:id - Update task',
+      'DELETE /api/tasks/:id - Delete task'
+    ]
+  });
+});
 
-// Health check route
+// Routes - CRITICAL: Make sure these lines are present
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/tasks', require('./routes/tasks'));
+
+// Base route
 app.get('/', (req, res) => {
   res.json({ message: 'Task Manager API is running!' });
+});
+
+// Catch-all for debugging
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    message: 'Route not found',
+    method: req.method,
+    url: req.originalUrl,
+    availableRoutes: [
+      'GET /',
+      'GET /api',
+      'POST /api/auth/register',
+      'POST /api/auth/login', 
+      'GET /api/auth/me',
+      'GET /api/tasks',
+      'POST /api/tasks',
+      'PUT /api/tasks/:id',
+      'DELETE /api/tasks/:id'
+    ]
+  });
 });
 
 const PORT = process.env.PORT || 5000;
