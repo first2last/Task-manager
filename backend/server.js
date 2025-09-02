@@ -22,40 +22,15 @@ app.use(express.json());
 const connectDB = require('./config/db');
 connectDB();
 
-// Add this route to handle /api
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/tasks', require('./routes/tasks'));
+
+// Base API route for testing
 app.get('/api', (req, res) => {
   res.json({ 
     message: 'Task Manager API is working!',
     endpoints: [
-      'POST /api/auth/register - Register new user',
-      'POST /api/auth/login - Login user', 
-      'GET /api/auth/me - Get current user',
-      'GET /api/tasks - Get user tasks',
-      'POST /api/tasks - Create task',
-      'PUT /api/tasks/:id - Update task',
-      'DELETE /api/tasks/:id - Delete task'
-    ]
-  });
-});
-
-// Routes - CRITICAL: Make sure these lines are present
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/tasks', require('./routes/tasks'));
-
-// Base route
-app.get('/', (req, res) => {
-  res.json({ message: 'Task Manager API is running!' });
-});
-
-// Catch-all for debugging
-app.use('*', (req, res) => {
-  res.status(404).json({ 
-    message: 'Route not found',
-    method: req.method,
-    url: req.originalUrl,
-    availableRoutes: [
-      'GET /',
-      'GET /api',
       'POST /api/auth/register',
       'POST /api/auth/login', 
       'GET /api/auth/me',
@@ -64,6 +39,15 @@ app.use('*', (req, res) => {
       'PUT /api/tasks/:id',
       'DELETE /api/tasks/:id'
     ]
+  });
+});
+
+// Catch-all 404
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    message: 'Route not found',
+    method: req.method,
+    url: req.originalUrl,
   });
 });
 

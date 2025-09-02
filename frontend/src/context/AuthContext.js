@@ -36,21 +36,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password) => {
-    try {
-      const response = await api.post('/api/auth/register', { name, email, password });
-      const { token, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      setUser(user);
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed' 
-      };
-    }
-  };
+ const register = async (name, email, password) => {
+  try {
+    const response = await api.post('/api/auth/register', { name, email, password });
+    const { token, user } = response.data;
+    
+    localStorage.setItem('token', token);
+    setUser(user);
+    return { success: true };
+  } catch (error) {
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Registration failed' 
+    };
+  }
+};
+
 
   const logout = () => {
     localStorage.removeItem('token');
